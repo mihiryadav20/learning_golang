@@ -5,7 +5,7 @@ import (
 
 	"auth/models"
 
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -15,8 +15,9 @@ var DB *gorm.DB
 // InitDatabase initializes the database connection
 func InitDatabase() {
 	var err error
-	log.Println("Opening SQLite database connection...")
-	DB, err = gorm.Open(sqlite.Open("auth.db"), &gorm.Config{})
+	log.Println("Opening MySQL database connection...")
+	dsn := "newuser:strongpassword@tcp(127.0.0.1:3306)/mydatabase?charset=utf8mb4&parseTime=True&loc=Local"
+	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
