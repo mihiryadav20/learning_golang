@@ -117,6 +117,7 @@ func setupRoutes(app *fiber.App) {
 	tryoutsAuth := auth.Group("/tryouts")
 	tryoutsAuth.Post("/", CreateTryout)
 	tryoutsAuth.Get("/my", GetTryoutsByTeam)
+	tryoutsAuth.Delete("/:id", DeleteTryout) // Add this line for DELETE
 
 	// Public tryout routes
 	tryouts := api.Group("/tryouts")             // Get all tryouts with pagination

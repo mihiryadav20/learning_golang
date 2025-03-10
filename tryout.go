@@ -17,7 +17,7 @@ type Tryout struct {
 	League      string    `json:"league"`
 	Division    string    `json:"division"`
 	Location    string    `json:"location" gorm:"not null"`
-	FormLink    string    `json:"formLink"`
+	FormLink    string    `json:"formLink" gorm:"column:form_link"` // Explicitly specify column name
 	StartDate   time.Time `json:"startDate" gorm:"not null"`
 	EndDate     time.Time `json:"endDate" gorm:"not null"`
 	CreatedAt   time.Time `json:"createdAt" gorm:"autoCreateTime"`
@@ -35,14 +35,14 @@ func (t *Tryout) BeforeCreate(tx *gorm.DB) error {
 
 // TryoutRequest represents the request to create a tryout
 type TryoutRequest struct {
-	Title       string `json:"title" form:"title"`
-	Description string `json:"description" form:"description"`
-	League      string `json:"league" form:"league"`
-	Division    string `json:"division" form:"division"`
-	Location    string `json:"location" form:"location"`
-	LastDate    string `json:"lastDate" form:"lastDate"`     // Format: "2006-01-02"
-	TryoutDate  string `json:"tryoutDate" form:"tryoutDate"` // Format: "2006-01-02"
-	StartDate   string `json:"startDate" form:"startDate"`   // Format: "2006-01-02"
-	EndDate     string `json:"endDate" form:"endDate"`       // Format: "2006-01-02"
-
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	League      string `json:"league"`
+	Division    string `json:"division"`
+	Location    string `json:"location"`
+	FormLink    string `json:"formLink"` // Ensure this matches exactly
+	TryoutDate  string `json:"tryoutDate"`
+	StartDate   string `json:"startDate"`
+	EndDate     string `json:"endDate"`
+	LastDate    string `json:"lastDate"`
 }

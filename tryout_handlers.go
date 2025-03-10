@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -21,6 +22,9 @@ func CreateTryout(c *fiber.Ctx) error {
 			"error":   err.Error(),
 		})
 	}
+
+	// Debug print the entire request
+	log.Printf("Received request: %+v", request)
 
 	// Validate required fields
 	if request.Title == "" || request.Location == "" ||
@@ -95,11 +99,15 @@ func CreateTryout(c *fiber.Ctx) error {
 		League:      request.League,
 		Division:    request.Division,
 		Location:    request.Location,
+		FormLink:    request.FormLink, // Explicitly set FormLink
 		TryoutDate:  tryoutDate,
 		StartDate:   startDate,
 		EndDate:     endDate,
 		LastDate:    lastDate,
 	}
+
+	// Debug print before saving
+	log.Printf("Tryout to be saved: %+v", tryout)
 
 	// Save to database
 	if err := DB.Create(&tryout).Error; err != nil {
@@ -306,8 +314,23 @@ func UpdateTryout(c *fiber.Ctx) error {
 
 // DeleteTryout deletes a tryout
 func DeleteTryout(c *fiber.Ctx) error {
+	// Capture start time for request tracking
+	startTime := time.Now()
+
+	// Log the incoming request details
+	log.Printf("[DeleteTryout] Start of request at %v", startTime)
+	log.Printf("[DeleteTryout] Team ID from context: %v", c.Locals("teamID"))
+	log.Printf("[DeleteTryout] Tryout ID from params: %s", c.Params("id"))
+
 	// Get team ID from context
-	teamID := c.Locals("teamID").(string)
+	teamID, ok := c.Locals("teamID").(string)
+	if !ok {
+		log.Printf("[DeleteTryout] Failed to retrieve team ID from context")
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Authentication failed",
+		})
+	}
 
 	// Get tryout ID from params
 	id := c.Params("id")
@@ -317,6 +340,8 @@ func DeleteTryout(c *fiber.Ctx) error {
 	result := DB.Where("id = ? AND team_id = ?", id, teamID).First(&existingTryout)
 
 	if result.Error != nil {
+		log.Printf("[DeleteTryout] Database query error: %v", result.Error)
+
 		if result.Error == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 				"status":  "error",
@@ -330,14 +355,24 @@ func DeleteTryout(c *fiber.Ctx) error {
 		})
 	}
 
+	// Log tryout details before deletion
+	log.Printf("[DeleteTryout] Tryout to be deleted:")
+	log.Printf("[DeleteTryout] ID: %s", existingTryout.ID)
+	log.Printf("[DeleteTryout] Team ID: %s", existingTryout.TeamID)
+	log.Printf("[DeleteTryout] Title: %s", existingTryout.Title)
+
 	// Delete from database
 	if err := DB.Delete(&existingTryout).Error; err != nil {
+		log.Printf("[DeleteTryout] Deletion error: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  "error",
 			"message": "Failed to delete tryout",
 			"error":   err.Error(),
 		})
 	}
+
+	// Log successful deletion
+	log.Printf("[DeleteTryout] Tryout deleted successfully. Duration: %v", time.Since(startTime))
 
 	// Return success response
 	return c.JSON(fiber.Map{
