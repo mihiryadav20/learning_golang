@@ -1,26 +1,38 @@
 package models
 
 import (
-	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
+	"time"
 )
 
-// User represents the user model in the database
+// User represents a chat application user
 type User struct {
-	gorm.Model
-	Username string `gorm:"type:varchar(255);uniqueIndex" json:"username"`
-	Email    string `gorm:"type:varchar(255);uniqueIndex" json:"email"`
-	Password string `json:"-"`
+	ID        int64     `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	Password  string    `json:"-"`      // Password is never returned in JSON
+	Status    string    `json:"status"` // online, offline, away
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// HashPassword hashes a password using bcrypt
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
+// Message represents a chat message
+type Message struct {
+	ID        int64     `json:"id"`
+	UserID    int64     `json:"user_id"`
+	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
-// CheckPasswordHash compares a password with a hash
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
+// Room represents a chat room
+type Room struct {
+	ID        int64     `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+// RoomMember represents a user membership in a room
+type RoomMember struct {
+	UserID   int64     `json:"user_id"`
+	RoomID   int64     `json:"room_id"`
+	JoinedAt time.Time `json:"joined_at"`
 }
